@@ -1,97 +1,79 @@
-# 🔐 MiniVault API
+# MiniVault API
 
-A local REST API for text generation with comprehensive logging capabilities, built for the ModelVault Take-Home assessment.
+A local REST API for text generation with comprehensive logging capabilities. Built as a complete offline solution with no external dependencies.
 
-## 🚀 Features
+## Overview
 
-- **FastAPI REST API** with `/generate` endpoint
-- **Comprehensive logging** of all interactions in JSON Lines format
-- **Optional local LLM integration** (Hugging Face Transformers or Ollama)
-- **Modern Gradio UI** for easy testing and interaction
-- **Graceful fallbacks** to dummy responses when LLM unavailable
-- **Production-ready** with proper error handling and validation
+This project provides a FastAPI-based REST API that accepts text prompts and returns generated responses. It includes optional local LLM integration through Ollama or Hugging Face Transformers, with intelligent fallbacks to dummy responses when models aren't available.
 
-## 📁 Project Structure
+## Features
 
-```
-minivault-api/
-├── app.py               # FastAPI application
-├── app_ui.py            # Gradio UI interface
-├── logs/                # Auto-created directory
-│   └── log.jsonl        # Interaction logs
-├── requirements.txt     # Python dependencies
-└── README.md           # This file
-```
+- REST API with `/generate` endpoint
+- Complete request/response logging in JSONL format
+- Local LLM support (Ollama + Transformers)
+- Web-based testing interface with Gradio
+- Automatic fallback to contextual dummy responses
+- Health monitoring and status endpoints
 
-## 🛠️ Quick Setup
+## Quick Start
 
-### 1. Create Virtual Environment
+### Prerequisites
+
+- Python 3.8+
+- Virtual environment (recommended)
+
+### Installation
 
 ```bash
-# Create virtual environment
-python -m venv minivault-env
+# Create and activate virtual environment
+python -m venv venv
+source venv/bin/activate  # Windows: venv\Scripts\activate
 
-# Activate virtual environment
-# On Windows:
-minivault-env\Scripts\activate
-# On macOS/Linux:
-source minivault-env/bin/activate
-```
-
-### 2. Install Dependencies
-
-```bash
-# Install all dependencies
+# Install dependencies
 pip install -r requirements.txt
-
-# Or install minimal dependencies (dummy responses only)
-pip install fastapi uvicorn gradio requests python-multipart
 ```
 
-### 3. Run the API Server
+### Running the API
 
 ```bash
 # Start the FastAPI server
 python app.py
-
-# Or use uvicorn directly
-uvicorn app:app --host 0.0.0.0 --port 8000 --reload
 ```
 
-The API will be available at: **http://localhost:8000**
+API will be available at `http://localhost:8000`
 
-### 4. Run the Gradio UI (Optional)
+### Running the UI (Optional)
 
 ```bash
-# In a new terminal (with virtual environment activated)
+# Start the Gradio interface
 python app_ui.py
 ```
 
-The UI will be available at: **http://localhost:7860**
+Web interface will be available at `http://localhost:7860`
 
-## 📡 API Usage
+## API Endpoints
 
 ### POST /generate
 
-Generate text based on a prompt.
+Generate text from a prompt.
 
 **Request:**
 ```json
 {
-  "prompt": "Hello, how are you?"
+  "prompt": "Your text prompt here"
 }
 ```
 
 **Response:**
 ```json
 {
-  "response": "This is a stubbed response from MiniVault API. How can I help you today?"
+  "response": "Generated response text"
 }
 ```
 
 ### GET /health
 
-Check API health and LLM availability.
+Check API status and LLM availability.
 
 **Response:**
 ```json
@@ -99,142 +81,110 @@ Check API health and LLM availability.
   "status": "healthy",
   "timestamp": "2024-01-15T10:30:00.123456",
   "local_llm_available": false,
-  "ollama_available": false
+  "ollama_available": true
 }
 ```
 
-### API Testing Examples
-
-```bash
-# Test with curl
-curl -X POST "http://localhost:8000/generate" \
-  -H "Content-Type: application/json" \
-  -d '{"prompt": "Hello, world!"}'
-
-# Test health endpoint
-curl "http://localhost:8000/health"
-```
-
-## 🤖 Local LLM Integration
-
-The API supports two methods for local LLM integration:
+## Local LLM Setup
 
 ### Option 1: Ollama (Recommended)
 
-1. Install Ollama: https://ollama.ai/
-2. Pull a model: `ollama pull llama2`
-3. Start Ollama: `ollama serve`
-4. Restart the API - it will auto-detect Ollama
+1. Install Ollama from https://ollama.ai/
+2. Pull a model: `ollama pull llama2:7b`
+3. Run the model: `ollama run llama2:7b`
+4. Restart the API (it will auto-detect Ollama)
 
 ### Option 2: Hugging Face Transformers
 
-The API will automatically use `microsoft/DialoGPT-small` if:
-- Transformers is installed (`pip install transformers torch`)
-- Ollama is not available
-- Sufficient system resources are available
+Install transformers: `pip install transformers torch`
+
+The API will automatically use `microsoft/DialoGPT-small` if Ollama isn't available.
 
 ### Fallback Behavior
 
-If neither LLM option is available, the API uses intelligent dummy responses based on prompt keywords.
+Without local LLMs, the API returns contextual dummy responses based on prompt patterns.
 
-## 📊 Logging System
+## Logging
 
-All interactions are logged to `logs/log.jsonl` in JSON Lines format:
+All interactions are logged to `logs/log.jsonl`:
 
 ```json
 {
   "timestamp": "2024-01-15T10:30:00.123456",
   "prompt": "Hello, how are you?",
-  "response": "This is a stubbed response...",
+  "response": "Generated response text",
   "processing_time_ms": 125,
-  "method": "dummy",
+  "method": "ollama",
   "error": null
 }
 ```
 
-### Log Analysis
+## Project Structure
 
-```bash
-# View recent logs
-tail -f logs/log.jsonl
-
-# Count total interactions
-wc -l logs/log.jsonl
-
-# Extract prompts only
-jq -r '.prompt' logs/log.jsonl
+```
+minivault-api/
+├── app.py               # FastAPI application
+├── app_ui.py            # Gradio UI interface
+├── logs/                # Auto-created log directory
+│   └── log.jsonl        # Interaction logs
+├── requirements.txt     # Dependencies
+└── README.md           # This file
 ```
 
-## 🎨 Gradio UI Features
+## Configuration
 
-The web interface provides:
-
-- **Real-time API testing** with prompt input and response display
-- **API health monitoring** with LLM availability status
-- **Example prompts** for quick testing
-- **Recent logs viewer** for debugging
-- **Processing metrics** (time, method used)
-- **Responsive design** that works on desktop and mobile
-
-## 🔧 Configuration Options
-
-### Environment Variables
+The API can be configured through environment variables:
 
 ```bash
-# API Configuration
 export API_HOST="0.0.0.0"
 export API_PORT="8000"
-
-# UI Configuration
-export UI_HOST="0.0.0.0"
-export UI_PORT="7860"
-
-# LLM Configuration
 export OLLAMA_URL="http://localhost:11434"
-export HF_MODEL="microsoft/DialoGPT-small"
 ```
 
-### Customization
+## Testing
 
-- **Change dummy responses:** Edit `_generate_dummy_response()` in `app.py`
-- **Adjust LLM model:** Modify `model_name` in `_initialize_local_llm()`
-- **Customize UI:** Edit CSS and components in `app_ui.py`
-- **Add new endpoints:** Extend the FastAPI routes in `app.py`
+```bash
+# Test the API with curl
+curl -X POST "http://localhost:8000/generate" \
+  -H "Content-Type: application/json" \
+  -d '{"prompt": "Hello, world!"}'
 
-## 🚨 Troubleshooting
+# Check health
+curl "http://localhost:8000/health"
+```
 
-### Common Issues
+## Troubleshooting
 
-1. **"Cannot connect to API"**
-   - Ensure FastAPI server is running: `python app.py`
-   - Check port 8000 is not in use: `netstat -an | grep 8000`
+**Cannot connect to API**
+- Ensure the FastAPI server is running: `python app.py`
+- Check that port 8000 isn't in use
 
-2. **"Module not found" errors**
-   - Activate virtual environment
-   - Install dependencies: `pip install -r requirements.txt`
+**Module not found errors**
+- Activate your virtual environment
+- Install dependencies: `pip install -r requirements.txt`
 
-3. **LLM not loading**
-   - Check available memory (>2GB recommended)
-   - Verify transformers installation: `pip install transformers torch`
+**Ollama not detected**
+- Verify Ollama is running: `ollama list`
+- Check the service is accessible: `curl http://localhost:11434/api/tags`
 
-4. **Slow responses**
-   - LLM loading takes time on first request
-   - Use dummy responses for fastest testing
+## Development
 
-### Performance Tips
+The codebase is structured for easy extension:
 
-- Use Ollama for production deployments
-- Increase `max_length` in transformers for longer responses
-- Monitor system resources when using local LLMs
-- Consider GPU acceleration for larger models
+- `app.py`: Main FastAPI application with generation logic
+- `app_ui.py`: Gradio interface for testing and interaction
+- Comprehensive error handling and logging throughout
+- Modular design for adding new LLM backends
 
-## 🔒 Security & Privacy
+## Dependencies
 
-- **Local-only:** No external API calls or data transmission
-- **Privacy-first:** All data stays on your machine
-- **Logged interactions:** Review `logs/log.jsonl` for audit trail
-- **No authentication:** Add auth middleware for production use
+Core dependencies (see `requirements.txt`):
+- `fastapi`: Web framework
+- `uvicorn`: ASGI server
+- `gradio`: Web UI
+- `requests`: HTTP client
+- `pydantic`: Data validation
 
-## 📈 Trade-offs Analysis
-
-### Local LLM vs. Dummy Responses
+Optional for enhanced LLM support:
+- `transformers`: Hugging Face models
+- `torch`: PyTorch backend

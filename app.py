@@ -172,7 +172,7 @@ class MiniVaultAPI:
         """Generate response using Ollama"""
         try:
             payload = {
-                "model": "llama2",  # Default model, can be configured
+                "model": "llama2:7b",  # Default model, can be configured
                 "prompt": prompt,
                 "stream": False
             }
